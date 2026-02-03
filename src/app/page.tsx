@@ -1,65 +1,177 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useMemo } from "react";
+import {
+  RootCoverage,
+  EyelidThickness,
+  RootAngle,
+  DiagnosisInput,
+} from "@/lib/types";
+import { getRecommendation } from "@/lib/getRecommendation";
+
+type OptionItem<T extends string> = { label: string; value: T };
+
+const rootCoverageOptions: OptionItem<RootCoverage>[] = [
+  { label: "덮인 곳 없음", value: "none" },
+  { label: "조금 덮임·앞머리만", value: "slight" },
+  { label: "많이 덮임", value: "heavy" },
+];
+
+const eyelidOptions: OptionItem<EyelidThickness>[] = [
+  { label: "얇음", value: "thin" },
+  { label: "두꺼움", value: "thick" },
+];
+
+const rootAngleOptions: OptionItem<RootAngle>[] = [
+  { label: "극하향", value: "extreme-down" },
+  { label: "평균", value: "average" },
+  { label: "극상향", value: "extreme-up" },
+];
+
+function SelectorGroup<T extends string>({
+  title,
+  options,
+  selected,
+  onSelect,
+}: {
+  title: string;
+  options: OptionItem<T>[];
+  selected: T | null;
+  onSelect: (v: T) => void;
+}) {
+  return (
+    <div className="selector-group">
+      <h3 className="selector-title">{title}</h3>
+      <div className="selector-buttons">
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            className={`selector-btn ${selected === opt.value ? "active" : ""}`}
+            onClick={() => onSelect(opt.value)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Home() {
+  const [rootCoverage, setRootCoverage] = useState<RootCoverage | null>(null);
+  const [eyelidThickness, setEyelidThickness] =
+    useState<EyelidThickness | null>(null);
+  const [rootAngle, setRootAngle] = useState<RootAngle | null>(null);
+  const [notExtremeDown, setNotExtremeDown] = useState(false);
+
+  const input: DiagnosisInput = {
+    rootCoverage,
+    eyelidThickness,
+    rootAngle,
+    notExtremeDown,
+  };
+
+  const result = useMemo(
+    () => getRecommendation(input),
+    [rootCoverage, eyelidThickness, rootAngle, notExtremeDown]
+  );
+
+  const handleReset = () => {
+    setRootCoverage(null);
+    setEyelidThickness(null);
+    setRootAngle(null);
+    setNotExtremeDown(false);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="app-container">
+      <header className="app-header">
+        <h1 className="app-title">뷰러펌 롯드 선정 진단기</h1>
+        <p className="app-subtitle">
+          고객의 조건을 선택하면 최적의 롯드를 추천해드립니다
+        </p>
+      </header>
+
+      <section className="input-section">
+        <SelectorGroup
+          title="1. 뿌리 노출 (덮임 정도)"
+          options={rootCoverageOptions}
+          selected={rootCoverage}
+          onSelect={setRootCoverage}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+
+        <SelectorGroup
+          title="2. 눈두덩 두께"
+          options={eyelidOptions}
+          selected={eyelidThickness}
+          onSelect={setEyelidThickness}
+        />
+
+        <SelectorGroup
+          title="3. 뿌리 각도"
+          options={rootAngleOptions}
+          selected={rootAngle}
+          onSelect={setRootAngle}
+        />
+
+        <div className="toggle-group">
+          <label className="toggle-label">
+            <span className="toggle-text">극하향모가 아닌 경우 (선택)</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={notExtremeDown}
+              className={`toggle-switch ${notExtremeDown ? "on" : ""}`}
+              onClick={() => setNotExtremeDown(!notExtremeDown)}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              <span className="toggle-knob" />
+            </button>
+          </label>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="result-section">
+        {result ? (
+          <div className="result-card">
+            <h2 className="result-title">추천 결과</h2>
+
+            <div className="result-grid">
+              <div className="result-item">
+                <span className="result-label">추천 컬</span>
+                <span className="result-value">
+                  {result.curls.join(" / ")}
+                </span>
+              </div>
+
+              <div className="result-item">
+                <span className="result-label">롯드 방향</span>
+                <span className="result-value">
+                  {result.directions.join(" / ")}
+                </span>
+              </div>
+
+              <div className="result-item">
+                <span className="result-label">사이즈</span>
+                <span className="result-value highlight">{result.size}</span>
+              </div>
+            </div>
+
+            <div className="result-memo">
+              <p className="memo-text">{result.memo}</p>
+            </div>
+          </div>
+        ) : (
+          <div className="result-placeholder">
+            <p>위 항목을 모두 선택하면 결과가 표시됩니다</p>
+          </div>
+        )}
+      </section>
+
+      {result && (
+        <button className="reset-btn" onClick={handleReset}>
+          초기화
+        </button>
+      )}
+    </main>
   );
 }
