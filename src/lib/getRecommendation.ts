@@ -1,73 +1,31 @@
-import {
-  DiagnosisInput,
-  DiagnosisResult,
-  CurlType,
-  RodDirection,
-  RodSize,
-} from "./types";
+import { RootCoverage, LashThickness, LashDirection, DiagnosisResult } from "./types";
 
-export function getRecommendation(input: DiagnosisInput): DiagnosisResult | null {
-  const { rootCoverage, eyelidThickness, rootAngle, notExtremeDown } = input;
+const DATA: Record<string, DiagnosisResult> = {
+  none_thin_down:   { curl: "모든 컬 가능", dir: "정방향", size: "정", desc: "극하향모는 뿌리 부분이 물방울 모양인 롯드 사용을 더 추천드려요!" },
+  none_thin_normal: { curl: "모든 컬 가능", dir: "정방향", size: "정", desc: "뿌리 덮임이 없어 자유로운 컬 선택이 가능해요!" },
+  none_thin_up:     { curl: "모든 컬 가능", dir: "정방향", size: "정", desc: "뿌리 덮임이 없어 자유로운 컬 선택이 가능해요!" },
+  none_thick_down:   { curl: "물방울 C컬", dir: "정방향", size: "정", desc: "극하향모는 뿌리 부분 물방울 모양인 롯드 사용을 더 추천드려요!" },
+  none_thick_normal: { curl: "C컬", dir: "정방향", size: "정", desc: "공간감이 많이 필요한 눈매이므로 C컬 롯드 추천!\n롱래쉬인 경우 롯드 아무거나 사용 가능해요!" },
+  none_thick_up:     { curl: "C컬", dir: "정방향", size: "정", desc: "공간감이 많이 필요한 눈매이므로 C컬 롯드 추천!\n롱래쉬인 경우 롯드 아무거나 사용 가능해요!" },
+  some_thin_down:   { curl: "모든 컬 가능", dir: "정방향", size: "정", desc: "극하향모는 뿌리 부분이 물방울 모양인 롯드 사용을 더 추천!\n롯드 방향 주의해서 시술해 주세요!" },
+  some_thin_normal: { curl: "모든 컬 가능", dir: "정방향", size: "정", desc: "롯드의 방향 주의해서 시술해 주세요!" },
+  some_thin_up:     { curl: "모든 컬 가능", dir: "정방향", size: "정", desc: "롯드의 방향 주의해서 시술해 주세요!" },
+  some_thick_down:   { curl: "물방울 C컬", dir: "정방향", size: "정", desc: "극하향모는 뿌리 부분이 물방울 모양인 롯드 사용을 더 추천!\n롯드의 방향 주의해서 시술해 주세요!" },
+  some_thick_normal: { curl: "C컬", dir: "정방향", size: "정", desc: "롯드의 방향 주의해서 시술해 주세요!" },
+  some_thick_up:     { curl: "C컬", dir: "정방향", size: "정", desc: "롯드의 방향 주의해서 시술해 주세요!" },
+  much_thin_down:   { curl: "물방울 C컬 / L컬", dir: "정방향 / 역방향", size: "물방울 C컬 = 다운, L컬 = 업", desc: "사용하는 컬에 따라 사이즈 선택이 다릅니다.\n롯드의 방향 주의해서 시술해 주세요!" },
+  much_thin_normal: { curl: "모든 컬 가능", dir: "정방향 / 역방향", size: "정", desc: "모든 컬 가능하지만 뿌리쪽 두께가 통통한 롯드로 선택하세요!\n롯드의 방향 주의해서 시술해 주세요!" },
+  much_thin_up:     { curl: "모든 컬 가능", dir: "정방향 / 역방향", size: "정", desc: "모든 컬 가능하지만 뿌리쪽 두께가 통통한 롯드로 선택하세요!\n롯드의 방향 주의해서 시술해 주세요!" },
+  much_thick_down:   { curl: "물방울 C컬", dir: "정방향 / 역방향", size: "다운", desc: "롯드의 방향 주의해서 시술해 주세요!" },
+  much_thick_normal: { curl: "C컬", dir: "정방향 / 역방향", size: "정", desc: "롯드의 방향 주의해서 시술해 주세요!" },
+  much_thick_up:     { curl: "C컬", dir: "정방향 / 역방향", size: "정", desc: "롯드의 방향 주의해서 시술해 주세요!" },
+};
 
-  if (!rootCoverage || !eyelidThickness || !rootAngle) {
-    return null;
-  }
-
-  // 1) 뿌리 각도로 사이즈 결정
-  let size: RodSize;
-  let curls: CurlType[];
-
-  switch (rootAngle) {
-    case "extreme-down":
-      size = "다운";
-      curls = ["C컬", "L컬"];
-      break;
-    case "average":
-      size = "정";
-      curls = ["C컬", "물방울 C컬", "L컬"];
-      break;
-    case "extreme-up":
-      size = "업";
-      curls = ["C컬", "물방울 C컬", "L컬"];
-      break;
-  }
-
-  const directions: RodDirection[] = ["정방향"];
-  let memo = "";
-
-  // 2) 뿌리 덮임 정도
-  switch (rootCoverage) {
-    case "none":
-      memo = "뿌리 노출이 없어 컬 선택이 자유롭습니다.";
-      break;
-    case "slight":
-      directions.push("역방향");
-      memo = "살짝 덮임이 있어 역방향 시술도 고려해보세요.";
-      break;
-    case "heavy":
-      curls = ["물방울 C컬", "L컬"];
-      if (!notExtremeDown) {
-        size = "업";
-        memo = "많이 덮여 있어 물방울 C컬 꽉차게 또는 L컬을 추천합니다. 사이즈 업으로 시술하세요.";
-      } else {
-        // "극하향모가 아닌 경우" 토글이 켜져 있으면 각도 룰 유지
-        memo = "많이 덮여 있어 물방울 C컬 꽉차게 또는 L컬을 추천합니다. 각도에 맞는 사이즈로 시술하세요.";
-      }
-      break;
-  }
-
-  // 3) 눈두덩 두꺼움 보정
-  if (eyelidThickness === "thick") {
-    const preferred: CurlType[] = ["바짝 C컬", "물방울 C컬"];
-    const hasMulbangul = curls.includes("물방울 C컬");
-    const hasCcurl = curls.includes("C컬");
-    if (hasMulbangul || hasCcurl) {
-      curls = preferred;
-    } else {
-      curls = preferred;
-    }
-    memo += " 눈두덩이 두꺼워 바짝 C컬 또는 물방울 C컬 쪽으로 보정했습니다.";
-  }
-
-  return { curls, directions, size, memo: memo.trim() };
+export function getRecommendation(
+  coverage: RootCoverage,
+  thickness: LashThickness,
+  direction: LashDirection
+): DiagnosisResult | null {
+  const key = `${coverage}_${thickness}_${direction}`;
+  return DATA[key] ?? null;
 }
