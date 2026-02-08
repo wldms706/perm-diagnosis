@@ -112,23 +112,21 @@ export default function Home() {
           <>
             <div className="step-label">STEP 1</div>
             <div className="step-question">
-              눈두덩이 속눈썹 뿌리를
+              속눈썹 뿌리가
               <br />
-              얼마나 덮고 있나요?
+              얼마나 덮여있나요?
             </div>
             <button type="button" className="opt" onClick={() => pick1("none")}>
-              <div className="opt-name">&#x1F441;&#xFE0F; 덮인 곳 없음</div>
-              <div className="opt-desc">뿌리가 잘 보이는 눈</div>
+              <div className="opt-name">👁️ 덮인 곳 없음</div>
+              <div className="opt-desc">뿌리가 모두 잘 보임</div>
             </button>
             <button type="button" className="opt" onClick={() => pick1("some")}>
-              <div className="opt-name">&#x1F441;&#xFE0F;&#x200D;&#x1F5E8;&#xFE0F; 조금 덮임</div>
-              <div className="opt-desc">뿌리가 살짝 덮여 있는 눈</div>
+              <div className="opt-name">👁️‍🗨️ 조금 덮임</div>
+              <div className="opt-desc">앞머리만, 또는 전체적으로 1mm정도 덮여있음</div>
             </button>
             <button type="button" className="opt" onClick={() => pick1("much")}>
-              <div className="opt-name">&#x1F611; 많이 덮임</div>
-              <div className="opt-desc">
-                뿌리가 많이 덮여 있는 눈 (무쌍, 속쌍 등)
-              </div>
+              <div className="opt-name">😑 많이 덮임</div>
+              <div className="opt-desc">뿌리가 2mm 이상 많이 덮여있는 눈</div>
             </button>
           </>
         )}
@@ -136,18 +134,18 @@ export default function Home() {
         {step === 2 && (
           <>
             <div className="step-label">STEP 2</div>
-            <div className="step-question">속눈썹 두께는 어떤가요?</div>
+            <div className="step-question">눈두덩 두께는 어떤가요?</div>
             <button type="button" className="opt" onClick={() => pick2("thin")}>
-              <div className="opt-name">&#x1FAB6; 얇음</div>
-              <div className="opt-desc">가늘고 부드러운 속눈썹</div>
+              <div className="opt-name">🪶 얇음</div>
+              <div className="opt-desc">눈두덩 두께가 1mm 이하로 얇은 두께</div>
             </button>
             <button
               type="button"
               className="opt"
               onClick={() => pick2("thick")}
             >
-              <div className="opt-name">&#x1F4AA; 두꺼움</div>
-              <div className="opt-desc">굵고 힘 있는 속눈썹</div>
+              <div className="opt-name">💪 두꺼움</div>
+              <div className="opt-desc">눈두덩 두께가 2mm 이상 통통한 두께</div>
             </button>
           </>
         )}
@@ -155,22 +153,22 @@ export default function Home() {
         {step === 3 && (
           <>
             <div className="step-label">STEP 3</div>
-            <div className="step-question">속눈썹이 자라는 방향은?</div>
+            <div className="step-question">속눈썹 뿌리의 방향은?</div>
             <button type="button" className="opt" onClick={() => pick3("down")}>
-              <div className="opt-name">&#x2B07;&#xFE0F; 극하향</div>
-              <div className="opt-desc">속눈썹이 아래로 많이 처져 있음</div>
+              <div className="opt-name">⬇️ 극하향</div>
+              <div className="opt-desc">속눈썹 뿌리가 바닥을 보고 자라는 형태</div>
             </button>
             <button
               type="button"
               className="opt"
               onClick={() => pick3("normal")}
             >
-              <div className="opt-name">&#x27A1;&#xFE0F; 평균</div>
-              <div className="opt-desc">일반적인 속눈썹 방향</div>
+              <div className="opt-name">➡️ 평균</div>
+              <div className="opt-desc">일반적인 속눈썹 뿌리 방향</div>
             </button>
             <button type="button" className="opt" onClick={() => pick3("up")}>
-              <div className="opt-name">&#x2B06;&#xFE0F; 극상향</div>
-              <div className="opt-desc">속눈썹이 위로 많이 올라가 있음</div>
+              <div className="opt-name">⬆️ 극상향</div>
+              <div className="opt-desc">속눈썹 뿌리가 거의 정면을 보고 자라는 형태</div>
             </button>
           </>
         )}
@@ -197,38 +195,42 @@ export default function Home() {
               </div>
             </div>
 
-            {s3 !== "down" && result.dir.includes("역방향") && (
+            {result.note && (
               <div className="note-box">
-                <div className="note-box-title">&#x1F4A1; 롯드 방향 참고</div>
+                <div className="note-box-title">💡 롯드 방향 참고</div>
                 <div className="note-box-text">
-                  롯드 방향 [ 정방향 / 역방향 ]이 나온 경우,
-                  <br />
-                  사용할 롯드 앞머리 부분 체크 후{" "}
-                  <strong>많이 얇은 경우에만 역방향</strong>으로 사용합니다.
+                  {result.note.split("\n").map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      {i < result.note.split("\n").length - 1 && <br />}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
 
-            <div className="desc-box">
-              <div className="desc-box-title">&#x1F4CB; 참고사항</div>
-              <div className="desc-box-text">
-                {result.desc.split("\n").map((line, i) => (
-                  <span key={i}>
-                    {line}
-                    {i < result.desc.split("\n").length - 1 && <br />}
-                  </span>
-                ))}
+            {result.desc && (
+              <div className="desc-box">
+                <div className="desc-box-title">🔎 참고사항</div>
+                <div className="desc-box-text">
+                  {result.desc.split("\n").map((line, i) => (
+                    <span key={i}>
+                      {line}
+                      {i < result.desc.split("\n").length - 1 && <br />}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="disclaimer">
               <p>
-                * 위의 추천 결과는 길이 상관없이 적용하시고, 극손상모의 경우
-                적용 제외합니다. (극손상모는 시술법 상이)
+                * 위의 추천 결과는 길이 상관없이 모두 적용하고,
+                극손상모의 경우 적용 제외합니다. (극손상모는 선택법 상이)
               </p>
               <p>
-                + 쏭원장의 시술법 기준으로 제작되어 시술법이 다를 경우 다소
-                결과가 다르게 나올 수 있습니다.
+                * 쏭원장의 시술법 기준으로 제작되어 시술법이 다를 경우
+                다소 결과가 다르게 나올 수 있습니다.
               </p>
             </div>
 

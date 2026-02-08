@@ -6,5 +6,6 @@ export interface DiagnosisResult {
   curl: string;
   dir: string;
   size: string;
+  note: string;
   desc: string;
 }
